@@ -18,6 +18,7 @@ clc; clear; close all;
 
 %%%%%%%%%%%%%%% Bild läses in %%%%%%%%%%%%%%%
 im = imread("DB1\db1_05.jpg"); %Originalbilden läses in
+newIm = im;
 
 figure('Name','Steg 1: "Balancering" & RGB-uppdelning','NumberTitle','off');
 subplot(2,3,1);
@@ -156,27 +157,27 @@ title('Value');
 thresIm = imInHSV(:,:,2);
 thresIm = thresIm .* 255;
 
-% [imSizeRow, imSizeCol] = size(thresIm);
-% newIm = zeros(imSizeRow,imSizeCol);
-% threshold = 50;
+[imSizeRow, imSizeCol] = size(thresIm);
+newIm = zeros(imSizeRow,imSizeCol);
+threshold = 75;
+
+for row = 1:imSizeRow
+   for col = 1:imSizeCol
+       if thresIm(row,col) < threshold
+           newIm(row,col) = 0;
+       else
+           newIm(row,col) = 255;
+       end
+   end
+end
+
+% lowpass = ones(5)/(5^2);
 % 
-% for row = 1:imSizeRow
-%    for col = 1:imSizeCol
-%        if thresIm(row,col) < threshold
-%            newIm(row,col) = 0;
-%        else
-%            newIm(row,col) = 255;
-%        end
-%    end
-% end
-
-lowpass = ones(5)/(5^2);
-
-bfilt = imfilter(thresIm,lowpass,"symmetric");
-
-threshhold = 0.27;
-% The thresholded image
-newIm = bfilt > threshhold*255;
+% bfilt = imfilter(thresIm,lowpass,"symmetric");
+% 
+% threshhold = 0.3;
+% % The thresholded image
+% newIm = bfilt > threshhold*255;
 
 
 
@@ -308,7 +309,7 @@ subplot(2,3,3);
 imshow(whitePatchIm);
 title('White Patch');
 
-prompt = "Grey World (0) eller White Patch (1)?"
+prompt = "Grey World (0) eller White Patch (1)?";
 greyOrWw = input(prompt);
 
 if greyOrWw == 0
