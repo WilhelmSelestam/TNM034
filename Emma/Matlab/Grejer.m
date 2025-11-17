@@ -17,7 +17,7 @@ clc; clear; close all;
 %Test
 
 %%%%%%%%%%%%%%% Bild läses in %%%%%%%%%%%%%%%
-im = imread("DB1\db1_05.jpg"); %Originalbilden läses in
+im = imread("DB1\db1_08.jpg"); %Originalbilden läses in
 newIm = im;
 
 figure('Name','Steg 1: "Balancering" & RGB-uppdelning','NumberTitle','off');
@@ -107,12 +107,12 @@ title('White Patch');
 %YCbCr: Luminance, Red Chroma and Blue Chroma
 %HSV: Hue, Saturation and Value
 
-imInYCbCr = rgb2ycbcr(im);
+imInYCbCr = rgb2ycbcr(imInGreyWorld);
 
-imInHSV = rgb2hsv(im);
+imInHSV = rgb2hsv(imInGreyWorld);
 
 figure('Name','Steg 2: Olika color space','NumberTitle','off');
-subplot(1,3,1);
+subplot(3,3,1);
 imshow(im);
 title('Original');
 
@@ -154,60 +154,81 @@ title('Value');
 %Maska ut ansikte
 %Tröskla för att få en BW bild
 
-thresIm = imInHSV(:,:,2);
-thresIm = thresIm .* 255;
+thresIm = imInYCbCr(:,:,1)./3 + imInYCbCr(:,:,2)./3 + imInYCbCr(:,:,3)./3;
+%thresIm = thresIm .* 255;
 
-[imSizeRow, imSizeCol] = size(thresIm);
-newIm = zeros(imSizeRow,imSizeCol);
-threshold = 75;
+imGray = im2gray(thresIm);
+thresIm = imGray;
 
-for row = 1:imSizeRow
-   for col = 1:imSizeCol
-       if thresIm(row,col) < threshold
-           newIm(row,col) = 0;
-       else
-           newIm(row,col) = 255;
-       end
-   end
-end
-
-% lowpass = ones(5)/(5^2);
+% [imSizeRow, imSizeCol] = size(thresIm);
+% newIm = zeros(imSizeRow,imSizeCol);
+% threshold = 135;
 % 
-% bfilt = imfilter(thresIm,lowpass,"symmetric");
-% 
-% threshhold = 0.3;
-% % The thresholded image
-% newIm = bfilt > threshhold*255;
+% for row = 1:imSizeRow
+%    for col = 1:imSizeCol
+%        if thresIm(row,col) < threshold
+%            newIm(row,col) = 0;
+%        else
+%            newIm(row,col) = 255;
+%        end
+%    end
+% end
+
+lowpass = ones(5)/(5^2);
+
+bfilt = imfilter(thresIm,lowpass,"symmetric");
+
+threshhold = 120;
+% The thresholded image
+newIm = bfilt < threshhold;
 
 
+innan = newIm;
 
-% kernal = strel('sphere',3);
+
+% kernal = strel('disk',1);
 % newIm = imerode(newIm,kernal);
-% kernal = strel('sphere', 2);
-% newIm = imdilate(newIm,kernal);
-% newIm = imdilate(newIm,kernal);
 % 
-% 
-SE = strel('disk',4);
-imClean = imopen(newIm,SE);
-imClean = imclose(imClean,SE); % Cleaned up binary image
+SE = strel('disk',3);
+newIm = imopen(newIm,SE);
+SE = strel('disk',3);
+newIm = imclose(newIm,SE);
+
+%Draw an ellipse
+x = linspace(461, 376);
+y = linspace(461, 376);
+a = 100;
+b = 100;
+ellipssss = (x-a).^2 + (y-b).^2;
+figure(8);
+
+plot(ellipssss);
 
 
-SE2 = strel('disk',1);
-imClean = imerode(imClean,SE2); 
 
-newIm = imClean;
+% newIm = imfill(newIm,'holes');
 
 
+figure(6);
+imshowpair(innan,newIm,'montage');
 
 
-figure('Name','Steg 3: Face Mask','NumberTitle','off');
-imshow(newIm);
+
+
+
+
+
+
+
+
+% figure('Name','Steg 3: Face Mask','NumberTitle','off');
+% imshow(newIm);
 
 
 
 
 %%
+%Testar att identifiera cirklar i en bild
 clc; clear; close all;
 
 im = imread("cirklar.jpg");
