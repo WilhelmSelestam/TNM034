@@ -93,11 +93,9 @@ subplot(3,2,4); imshow(EyeMapL); title('Luminance Eye Map (L)');
 subplot(3,2,5); imshow(EyeMapCL); title('Combined Eye Map (C + L)');
 subplot(3,2,6); imshow(EyeMap); title('Find Eyes');
 %%
-% Eigenfaces
+
 filename = 'DB1\db1_01.jpg';
 img = im2double(rgb2gray(imread(filename)));
-% hitta en bra storlek på images först som sedan reshapes i loopen till
-% behov
 [h, w] = size(img);
 images = zeros(h*w, 16);
 images(:,1) = img(:);
@@ -105,6 +103,8 @@ images(:,1) = img(:);
 for i = 2:16
     filename = sprintf('DB1\\db1_%02d.jpg', i);
     img = im2double(rgb2gray(imread(filename)));
+
+ 
      % Resize till samma storlek
     img = imresize(img, [h, w]);
 
@@ -114,10 +114,9 @@ end
 mean_face = mean(images, 2);
 A = images - mean_face;
 C = A' * A;
-% D är eigenvalues i en diagonalmatris
 [V, D] = eig(C);
 eigenfaces = A * V;
-% sorterat med descend från 16 och ner där jag tar alla eigenvektorer
+% sorterat med descend fö
 [eigenvalues, order] = sort(diag(D), 'descend');
 eigenfaces = eigenfaces(:, order);
 
