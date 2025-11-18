@@ -120,7 +120,10 @@ eigenfaces = A * V;
 % sorterat med descend från 16 och ner där jag tar alla eigenvektorer
 [eigenvalues, order] = sort(diag(D), 'descend');
 eigenfaces = eigenfaces(:, order);
-
-ef = reshape(eigenfaces(:,1), [h, w]);
-figure; 
-imshow(mat2gray(ef));
+eigenfaces = eigenfaces(:,1:16);
+weights = eigenfaces' * A;
+i = 1; % välj bild
+I = mean_face + eigenfaces * weights(:,i);
+%ef = reshape(eigenfaces(:,1), [h, w]);
+%figure; 
+%imshow(mat2gray(ef));
