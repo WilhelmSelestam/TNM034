@@ -1,6 +1,6 @@
 clc; clear; close all;
 
-I_orig = imread('Images/rot.jpg');
+I_orig = imread('DB1\db1_11.jpg');
 %I_orig = imrotate(I_orig, 10);
 %imwrite(I_orig, 'rot.jpg')
 I = im2double(I_orig);
@@ -11,7 +11,8 @@ Y = I_ycbcr(:,:,1);
 thresh = quantile(Y(:), 0.95); 
 ref_mask = Y > thresh;
 
-if nnz(ref_mask) > 100
+%Check för att se om bilden behöver vitbalanceras
+if nnz(ref_mask) > 100 
     R = I(:,:,1);
     G = I(:,:,2);
     B = I(:,:,3);
@@ -66,7 +67,8 @@ skin_mask = skin_mask_final;
 
 skin_mask = bwconvhull(skin_mask);
 
-%imshow(skin_mask);
+figure(2);
+imshow(skin_mask);
 
 cc = bwconncomp(skin_mask);
 stats = regionprops(cc, 'BoundingBox', 'Area');
