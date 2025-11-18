@@ -1,5 +1,4 @@
-clc;
-clear;
+clc; clear; close all;
 
 I_orig = imread('Images/rot.jpg');
 %I_orig = imrotate(I_orig, 10);
