@@ -117,6 +117,10 @@ C = A' * A;
 % D är eigenvalues i en diagonalmatris
 [V, D] = eig(C);
 eigenfaces = A * V;
+% normalisera
+for j = 1:size(eigenfaces,2)
+    eigenfaces(:,j) = eigenfaces(:,j) / norm(eigenfaces(:,j));
+end
 % sorterat med descend från 16 och ner där jag tar alla eigenvektorer
 [eigenvalues, order] = sort(diag(D), 'descend');
 eigenfaces = eigenfaces(:, order);
@@ -124,6 +128,12 @@ eigenfaces = eigenfaces(:,1:16);
 weights = eigenfaces' * A;
 i = 1; % välj bild
 I = mean_face + eigenfaces * weights(:,i);
+figure;
+for i = 1:16
+    subplot(4,5,i); % arrange in a grid
+    imagesc(reshape(eigenfaces(:,i), h, w)); 
+    colormap gray;
+end
 %ef = reshape(eigenfaces(:,1), [h, w]);
 %figure; 
 %imshow(mat2gray(ef));
