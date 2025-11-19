@@ -1,5 +1,4 @@
-clc;
-clear;
+clc; clear; close all;
 
 I_orig = imread('DB1/db1_12.jpg');
 %I_orig = imrotate(I_orig, 10);
@@ -12,26 +11,40 @@ Y = I_ycbcr(:,:,1);
 thresh = quantile(Y(:), 0.95); 
 ref_mask = Y > thresh;
 
-if nnz(ref_mask) > 100
-    R = I(:,:,1);
-    G = I(:,:,2);
-    B = I(:,:,3);
-    
-    avg_R = mean(R(ref_mask));
-    avg_G = mean(G(ref_mask));
-    avg_B = mean(B(ref_mask));
+%Välj "White Patch" (1) eller "Grey World" (0)
+normalisera = 0;
 
-    scale_R = 1.0 / avg_R;
-    scale_G = 1.0 / avg_G;
-    scale_B = 1.0 / avg_B;
+%Check för att se om bilden behöver vitbalanceras
+if nnz(ref_mask) > 100 
+        R = I(:,:,1);
+        G = I(:,:,2);
+        B = I(:,:,3);
+        
+        avg_R = mean(R(ref_mask));
+        avg_G = mean(G(ref_mask));
+        avg_B = mean(B(ref_mask));
 
-    I_comp = zeros(size(I));
-    I_comp(:,:,1) = I(:,:,1) * scale_R;
-    I_comp(:,:,2) = I(:,:,2) * scale_G;
-    I_comp(:,:,3) = I(:,:,3) * scale_B;
+    if normalisera == 1
+        scale_R = 1.0 / avg_R;
+        scale_G = 1.0 / avg_G;
+        scale_B = 1.0 / avg_B;
     
-    I_comp(I_comp > 1) = 1;
-    
+        I_comp = zeros(size(I));
+        I_comp(:,:,1) = I(:,:,1) * scale_R;
+        I_comp(:,:,2) = I(:,:,2) * scale_G;
+        I_comp(:,:,3) = I(:,:,3) * scale_B;
+        
+        I_comp(I_comp > 1) = 1;
+    else
+        gainForR = avg_G/avg_R;
+        gainForG = avg_G/avg_B;
+            
+        %Räkna ut nya RChannel & GChannel med gainForR & gainForG
+        R = gainForR .* R;
+        G = gainForG .* G;
+        
+        I_comp = cat(3,R, G, B);
+    end
 else
     I_comp = I;
 end
@@ -67,8 +80,9 @@ skin_mask = skin_mask_final;
 
 skin_mask = bwconvhull(skin_mask);
 
-
-%imshow(skin_mask);
+figure('Name','Skin mask','NumberTitle','off');
+imshow(skin_mask);
+title('Skin mask'); %Visar inte titeln, vet inte varför
 
 cc = bwconncomp(skin_mask);
 stats = regionprops(cc, 'BoundingBox', 'Area');
