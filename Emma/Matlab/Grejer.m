@@ -17,7 +17,7 @@ clc; clear; close all;
 %Test
 
 %%%%%%%%%%%%%%% Bild läses in %%%%%%%%%%%%%%%
-im = imread("DB1\db1_12.jpg"); %Originalbilden läses in
+im = imread("DB1\db1_02.jpg"); %Originalbilden läses in
 newIm = im;
 
 figure('Name','Steg 1: "Balancering" & RGB-uppdelning','NumberTitle','off');
@@ -232,7 +232,7 @@ clc; clear; close all;
 %Test
 
 %%%%%%%%%%%%%%% Bild läses in %%%%%%%%%%%%%%%
-im = imread("DB1\db1_12.jpg"); %Originalbilden läses in
+im = imread("DB1\db1_02.jpg"); %Originalbilden läses in
 originalIm = im;
 
 % figure('Name','Steg 0: Originalbild','NumberTitle','off');
@@ -244,6 +244,7 @@ newIm = toGreyWorld(im);
 %newIm = toWhitePatch(im);
 
 
+bonk = newIm;
 bink = mean(mean(mean(newIm)));
 
 %Få ut YCbCr & HSV
@@ -285,6 +286,9 @@ SE = strel('disk',10);
 newIm = imopen(newIm,SE);
 
 newIm = imfill(newIm,'holes');
+% 
+% SE = strel('sphere',15);
+% newIm = imopen(newIm,SE);
 
 
 
