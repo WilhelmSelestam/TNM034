@@ -17,7 +17,7 @@ clc; clear; close all;
 %Test
 
 %%%%%%%%%%%%%%% Bild läses in %%%%%%%%%%%%%%%
-im = imread("DB1\db1_01.jpg"); %Originalbilden läses in
+im = imread("DB1\db1_12.jpg"); %Originalbilden läses in
 newIm = im;
 
 figure('Name','Steg 1: "Balancering" & RGB-uppdelning','NumberTitle','off');
@@ -232,7 +232,7 @@ clc; clear; close all;
 %Test
 
 %%%%%%%%%%%%%%% Bild läses in %%%%%%%%%%%%%%%
-im = imread("DB1\db1_14.jpg"); %Originalbilden läses in
+im = imread("DB1\db1_12.jpg"); %Originalbilden läses in
 originalIm = im;
 
 % figure('Name','Steg 0: Originalbild','NumberTitle','off');
@@ -265,12 +265,24 @@ newIm = newIm < threshhold;
 %%%%%%%%%%%%%% Face Mask %%%%%%%%%%%%%%
 %Face Mask, Morphological operations
 
-SE = strel('disk',2);
+innan = newIm;
+
+SE = strel('disk',8);
 newIm = imdilate(newIm,SE);
 
 
 % SE = strel('disk',3);
 % newIm = imdilate(newIm,SE);
+
+newIm = imfill(newIm,'holes');
+
+newIm = newIm - innan;
+
+SE = strel('disk',3);
+newIm = imclose(newIm,SE);
+
+SE = strel('disk',10);
+newIm = imopen(newIm,SE);
 
 newIm = imfill(newIm,'holes');
 
