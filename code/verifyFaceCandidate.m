@@ -1,5 +1,5 @@
 function [best_score, best_ellipse, best_e1, best_e2] = verifyFaceCandidate(eyeMap, mouthMap, Y, face_mask)
-    MAX_EYE_ANGLE_DEG = 30;
+    MAX_EYE_ANGLE_DEG = 30; % 5% på db2 -> kanske sätta gränsen på 10% ??????
     MIN_MOUTH_BELOW_EYES = 0.1;
     MAX_MOUTH_X_OFFSET = 0.4;
     RATIO_EYE_MOUTH_MIN = 0.8;

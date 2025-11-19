@@ -1,7 +1,7 @@
 clc;
 clear;
 
-I_orig = imread('Images/rot.jpg');
+I_orig = imread('DB1/db1_12.jpg');
 %I_orig = imrotate(I_orig, 10);
 %imwrite(I_orig, 'rot.jpg')
 I = im2double(I_orig);
@@ -66,6 +66,7 @@ skin_mask_final = imfill(skin_mask_final, 'holes');
 skin_mask = skin_mask_final;
 
 skin_mask = bwconvhull(skin_mask);
+
 
 %imshow(skin_mask);
 
