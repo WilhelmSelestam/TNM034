@@ -136,8 +136,8 @@ end
 eigenfaces = eigenfaces(:, order);
 eigenfaces = eigenfaces(:,1:16);
 weights = eigenfaces' * A; % vikter hittade
-% testade en bild för att se om den kan hitta närmaste bilden 
-comparingface = 'DB1\db1_16.jpg';
+
+comparingface = 'DB1\db1_01.jpg';
 comparingface = im2double(rgb2gray(imread(comparingface)));
 comparingface = comparingface(y1:y1+cropH-1, x1:x1+cropW-1, :);
 comparingfacezero = zeros(h*w, 1);
@@ -145,7 +145,6 @@ comparingfacezero(:,1) = comparingface(:);
 comparingface = comparingfacezero - mean_face;
 new_weights = eigenfaces' * comparingface;
 distances = vecnorm(weights - new_weights, 2, 1);
-[~,matchadbild] = min(distances);
 %i = 1; % välj bild
 %I = mean_face + eigenfaces * weights(:,i);
 
