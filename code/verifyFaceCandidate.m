@@ -1,5 +1,5 @@
 function [best_score, best_ellipse, best_e1, best_e2] = verifyFaceCandidate(eyeMap, mouthMap, Y, face_mask)
-    MAX_EYE_ANGLE_DEG = 30; % 5% på db2 -> kanske sätta gränsen på 10% ??????
+    MAX_EYE_ANGLE_DEG = 10; % 5% på db2 -> kanske sätta gränsen på 10% ??????
     MIN_MOUTH_BELOW_EYES = 0.1;
     MAX_MOUTH_X_OFFSET = 0.4;
     RATIO_EYE_MOUTH_MIN = 0.8;
@@ -66,7 +66,7 @@ function [best_score, best_ellipse, best_e1, best_e2] = verifyFaceCandidate(eyeM
 
                 score_map = (eye_stats(i).MeanIntensity + eye_stats(j).MeanIntensity + mouth_stats(k).MeanIntensity) / 3;
                 
-                score_orientation = (1 - (abs(eye_angle_deg) / 90)) * 0.2;
+                score_orientation = (1 - (abs(eye_angle_deg) / 90)) * 0.7;
 
                 center_x = eye_mid(1);
                 center_y = eye_mid(2) + 0.4 * eye_mouth_dist;
@@ -106,11 +106,11 @@ function [X_coords, Y_coords] = getEllipsePixels(ellipse_params, imgSize)
     
     cx = ellipse_params(1);
     cy = ellipse_params(2);
-    a = ellipse_params(3) / 2; % semi-minor axis
-    b = ellipse_params(4) / 2; % semi-major axis
+    a = ellipse_params(3) / 2;
+    b = ellipse_params(4) / 2;
     theta = ellipse_params(5);
 
-    t = linspace(0, 2*pi, 100); % 100 points around ellipse
+    t = linspace(0, 2*pi, 100);
     
     x = cx + a * cos(t) * cos(theta) - b * sin(t) * sin(theta);
     y = cy + a * cos(t) * sin(theta) + b * sin(t) * cos(theta);
@@ -130,8 +130,8 @@ function drawEllipse(ellipse_params)
     
     cx = ellipse_params(1);
     cy = ellipse_params(2);
-    a = ellipse_params(3) / 2; % semi-minor axis
-    b = ellipse_params(4) / 2; % semi-major axis
+    a = ellipse_params(3) / 2;
+    b = ellipse_params(4) / 2;
     theta = ellipse_params(5);
 
     t = linspace(0, 2*pi, 100);
@@ -140,6 +140,6 @@ function drawEllipse(ellipse_params)
     y = cy + a * cos(t) * sin(theta) + b * sin(t) * cos(theta);
     
     hold on;
-    plot(x, y, 'g', 'LineWidth', 2); % Draw in green
+    plot(x, y, 'g', 'LineWidth', 2);
     hold off;
 end

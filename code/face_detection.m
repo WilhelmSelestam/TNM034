@@ -1,6 +1,6 @@
 clc; clear; close all;
 
-I_orig = imread('DB1/db1_12.jpg');
+I_orig = imread('db2/bl_04.jpg');
 %I_orig = imrotate(I_orig, 10);
 %imwrite(I_orig, 'rot.jpg')
 I = im2double(I_orig);
@@ -12,7 +12,7 @@ thresh = quantile(Y(:), 0.95);
 ref_mask = Y > thresh;
 
 %Välj "White Patch" (1) eller "Grey World" (0)
-normalisera = 0;
+normalisera = 1;
 
 %Check för att se om bilden behöver vitbalanceras
 if nnz(ref_mask) > 100 
@@ -63,32 +63,37 @@ I_comp = im2uint8(I_comp);
 I_comp_ycbcr = rgb2ycbcr(I_comp);
 
 
-skin_mask = detectSkin(I_comp_ycbcr);
+skin_mask_raw = detectSkin(I_comp_ycbcr);
 
-%imshow(skin_mask);
+%imshow(skin_mask_raw);
 
 
 se_open = strel('disk', 3);
-skin_mask_opened = imopen(skin_mask, se_open);
+skin_mask = imopen(skin_mask_raw, se_open);
 
 se_close = strel('disk', 15);
-skin_mask_final = imclose(skin_mask_opened, se_close);
+skin_mask = imclose(skin_mask, se_close);
 
-skin_mask_final = imfill(skin_mask_final, 'holes');
+skin_mask = imfill(skin_mask, 'holes');
 
-skin_mask = skin_mask_final;
+%skin_mask = bwconvhull(skin_mask);
 
-skin_mask = bwconvhull(skin_mask);
+%imshow(skin_mask);
 
-figure('Name','Skin mask','NumberTitle','off');
+figure;
+subplot(2, 1, 1);
+imshow(skin_mask_raw);
+title('skin mask raw');
+
+subplot(2, 1, 2);
 imshow(skin_mask);
-title('Skin mask'); %Visar inte titeln, vet inte varför
+title('skin mask');
 
 cc = bwconncomp(skin_mask);
 stats = regionprops(cc, 'BoundingBox', 'Area');
 
 min_face_area = 500;
-max_face_area = size(skin_mask, 1) * size(skin_mask, 2) * 1.75;
+max_face_area = size(skin_mask, 1) * size(skin_mask, 2) * 1.75; % 0.75
 
 valid_indices = [stats.Area] > min_face_area & [stats.Area] < max_face_area;
 face_candidates_stats = stats(valid_indices);
@@ -98,24 +103,20 @@ face_candidate_boxes = cat(1, face_candidates_stats.BoundingBox);
 
 valid_pixel_lists = cc.PixelIdxList(valid_indices);
 
-eyeMap = createEyeMap(I_comp_ycbcr, skin_mask);
-imshow(eyeMap)
-
-
-
 detected_faces = [];
 face_scores = [];
 e1 = [];
 e2 = [];
 
-MIN_FACE_SCORE_THRESHOLD = 0.1; % ????????
+MIN_FACE_SCORE_THRESHOLD = 0.2; % ????????
 
 for i = 1:length(face_candidates_stats)
     
     current_face_mask = false(size(skin_mask));
     current_face_mask(valid_pixel_lists{i}) = true;
 
-    %imshow(current_face_mask)
+    figure(i)
+    imshow(current_face_mask)
     
     eyeMap = createEyeMap(I_comp_ycbcr, current_face_mask);
     mouthMap = createMouthMap(I_comp_ycbcr, current_face_mask);
@@ -141,11 +142,12 @@ ellipse
 
 detected_faces
 
-line([e1(1), e2(1)], [e1(2), e2(2)], 'Color', 'yellow', 'LineWidth', 2);
+
 
 for i = 1:size(detected_faces, 1)
     %drawEllipse(detected_faces(i));
     drawEllipse(detected_faces(i, :));
+    line([e1(1), e2(1)], [e1(2), e2(2)], 'Color', 'yellow', 'LineWidth', 2);
 end
 
 
@@ -159,7 +161,7 @@ for i = 1:length(face_candidates_stats)
     current_face_mask(valid_pixel_lists{i}) = true;
     
     eyeMap = createEyeMap(I_comp_ycbcr, current_face_mask);
-    imshow(eyeMap)
+    %imshow(eyeMap)
     mouthMap = createMouthMap(I_comp_ycbcr, current_face_mask);
     
     bbox = face_candidates_stats(i).BoundingBox;
