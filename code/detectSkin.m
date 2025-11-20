@@ -1,11 +1,21 @@
 function skin_mask = detectSkin(I_ycbcr)
 
+    %img = imgaussfilt(img, 1);
+
     Cb = double(I_ycbcr(:,:,2));
     Cr = double(I_ycbcr(:,:,3));
 
-    mask_Cb = (Cb >= 75) & (Cb <= 135);
-    mask_Cr = (Cr >= 130) & (Cr <= 180);
+    mask_Cb = (Cb >= 77) & (Cb <= 127);
+    mask_Cr = (Cr >= 133) & (Cr <= 173);
     skin_mask = mask_Cb & mask_Cr;
+
+    imgHSV = rgb2hsv(ycbcr2rgb(I_ycbcr));
+    H = imgHSV(:,:,1);
+    S = imgHSV(:,:,2);
+
+    maskHSV = (H <= 0.15 | H >= 0.95) & (S >= 0.2 & S <= 0.8);
+    
+    skin_mask = skin_mask & maskHSV;
 
     %{ 
     

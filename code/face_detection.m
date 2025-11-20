@@ -63,7 +63,6 @@ I_comp = im2uint8(I_comp);
 I_comp_ycbcr = rgb2ycbcr(I_comp);
 
 
-%{
 skin_mask_raw = detectSkin(I_comp_ycbcr);
 
 %imshow(skin_mask_raw);
@@ -81,8 +80,7 @@ skin_mask = imfill(skin_mask, 'holes');
 
 %imshow(skin_mask);
 
-%}
-
+%{
 newIm = I_comp;
 
 
@@ -134,6 +132,8 @@ newIm = imfill(newIm,'holes');
 
 skin_mask = newIm;
 
+%}
+
 imshow(skin_mask)
 
 
@@ -147,6 +147,7 @@ subplot(2, 1, 2);
 imshow(skin_mask);
 title('skin mask');
 %}
+
 cc = bwconncomp(skin_mask);
 %cc = [cc cc2];
 stats = regionprops(cc, 'BoundingBox', 'Area');
