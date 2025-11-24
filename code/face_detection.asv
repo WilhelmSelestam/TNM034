@@ -179,8 +179,8 @@ for i = 1:length(face_candidates_stats)
 
     figure(i)
     imshow(current_face_mask)
-    
-    eyeMap = EyeMap(im2double(I_comp_ycbcr));
+    im2double()
+    eyeMap = EyeMap(I_comp_ycbcr, current_face_mask);
    
     mouthMap = createMouthMap(I_comp_ycbcr, current_face_mask);
 
@@ -225,7 +225,7 @@ for i = 1:length(face_candidates_stats)
     current_face_mask = false(size(skin_mask));
     current_face_mask(valid_pixel_lists{i}) = true;
     
-    eyeMap = EyeMap(im2double(I_comp_ycbcr));
+    eyeMap = createEyeMap(I_comp_ycbcr, current_face_mask);
     imshow(eyeMap)
     mouthMap = createMouthMap(I_comp_ycbcr, current_face_mask);
     
