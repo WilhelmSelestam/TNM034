@@ -1,4 +1,4 @@
-A = imread("DB1\db1_12.jpg");
+A = imread("DB1\db1_10.jpg");
 A = im2double(A);
 
 % RGB kanaler
@@ -158,3 +158,4 @@ distances = vecnorm(weights - new_weights, 2, 1);
 %ef = reshape(eigenfaces(:,1), [h, w]);
 %figure; 
 %imshow(mat2gray(ef));
+%%
