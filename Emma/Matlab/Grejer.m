@@ -17,7 +17,7 @@ clc; clear; close all;
 %Test
 
 %%%%%%%%%%%%%%% Bild läses in %%%%%%%%%%%%%%%
-im = imread("DB1\db1_02.jpg"); %Originalbilden läses in
+im = imread("DB1\db1_08.jpg"); %Originalbilden läses in
 newIm = im;
 
 figure('Name','Steg 1: "Balancering" & RGB-uppdelning','NumberTitle','off');
