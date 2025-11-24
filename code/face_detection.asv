@@ -1,6 +1,6 @@
-clc; clear; close all;
+    clc; clear; close all;
 
-I_orig = imread('DB1\db1_08.jpg');
+I_orig = imread('DB1\db1_0.jpg');
 %I_orig = imrotate(I_orig, 10);
 %imwrite(I_orig, 'rot.jpg')
 I = im2double(I_orig);
@@ -137,7 +137,6 @@ skin_mask = newIm;
 imshow(skin_mask)
 
 
-%{
 figure;
 subplot(2, 1, 1);
 imshow(skin_mask_raw);
@@ -146,7 +145,6 @@ title('skin mask raw');
 subplot(2, 1, 2);
 imshow(skin_mask);
 title('skin mask');
-%}
 
 cc = bwconncomp(skin_mask);
 %cc = [cc cc2];

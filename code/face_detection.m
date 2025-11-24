@@ -63,24 +63,24 @@ I_comp = im2uint8(I_comp);
 I_comp_ycbcr = rgb2ycbcr(I_comp);
 
 
-skin_mask_raw = detectSkin(I_comp_ycbcr);
-
-%imshow(skin_mask_raw);
-
-
-se_open = strel('disk', 3);
-skin_mask = imopen(skin_mask_raw, se_open);
-
-se_close = strel('disk', 15);
-skin_mask = imclose(skin_mask, se_close);
-
-skin_mask = imfill(skin_mask, 'holes');
+% skin_mask_raw = detectSkin(I_comp_ycbcr);
+% 
+% %imshow(skin_mask_raw);
+% 
+% 
+% se_open = strel('disk', 3);
+% skin_mask = imopen(skin_mask_raw, se_open);
+% 
+% se_close = strel('disk', 15);
+% skin_mask = imclose(skin_mask, se_close);
+% 
+% skin_mask = imfill(skin_mask, 'holes');
 
 %skin_mask_full = bwconvhull(skin_mask);
 
 %imshow(skin_mask);
 
-%{
+
 newIm = I_comp;
 
 
@@ -132,21 +132,21 @@ newIm = imfill(newIm,'holes');
 
 skin_mask = newIm;
 
-%}
+
 
 imshow(skin_mask)
 
+%%
 
-%{
-figure;
-subplot(2, 1, 1);
-imshow(skin_mask_raw);
-title('skin mask raw');
+% figure;
+% subplot(2, 1, 1);
+% imshow(skin_mask_raw);
+% title('skin mask raw');
+% 
+% subplot(2, 1, 2);
+% imshow(skin_mask);
+% title('skin mask');
 
-subplot(2, 1, 2);
-imshow(skin_mask);
-title('skin mask');
-%}
 
 cc = bwconncomp(skin_mask);
 %cc = [cc cc2];

@@ -1,4 +1,33 @@
-function EyeMap = EyeMap(A_balanced)
+function EyeMap = EyeMap(A)
+
+% RGB kanaler
+R = A(:,:,1);
+G = A(:,:,2);
+B = A(:,:,3);
+
+% medelvärde för varje kanal
+meanR = mean(R(:));
+meanG = mean(G(:));
+meanB = mean(B(:));
+
+% medelvärde
+meanGray = (meanR + meanG + meanB) / 3;
+
+% skalningsfaktorer
+scaleR = meanGray / meanR;
+scaleG = meanGray / meanG;
+scaleB = meanGray / meanB;
+
+% skala varje kanal
+R_balanced = R * scaleR;
+G_balanced = G * scaleG;
+B_balanced = B * scaleB;
+
+% gör det till en bild
+A_balanced = cat(3, R_balanced, G_balanced, B_balanced);
+
+% Klipp värden mellan [0, 1]
+A_balanced = min(max(A_balanced, 0), 1);
 
 % Chroma Eye Map (Eye Map C)
 
