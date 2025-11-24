@@ -159,3 +159,7 @@ distances = vecnorm(weights - new_weights, 2, 1);
 %figure; 
 %imshow(mat2gray(ef));
 %%
+A = imread("DB1\db1_02.jpg");
+A = im2double(A);
+eyemaptest = EyeMap(A);
+imshow(eyemaptest);
