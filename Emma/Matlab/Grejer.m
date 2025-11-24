@@ -17,8 +17,12 @@ clc; clear; close all;
 %Test
 
 %%%%%%%%%%%%%%% Bild läses in %%%%%%%%%%%%%%%
-im = imread("DB1\db1_08.jpg"); %Originalbilden läses in
+im = imread("DB1\db1_01.jpg"); %Originalbilden läses in
 newIm = im;
+
+
+bonk = mean(mean(mean(newIm)));
+
 
 figure('Name','Steg 1: "Balancering" & RGB-uppdelning','NumberTitle','off');
 subplot(2,3,1);
@@ -158,6 +162,8 @@ title('Value');
 
 imtoThresh = imInYCbCr(:,:,1)./3 + imInYCbCr(:,:,2)./3 + imInYCbCr(:,:,3)./3;
 
+%imtoThresh = imInHSV(:,:,1)./3 + imInHSV(:,:,2)./3 + imInHSV(:,:,3)./3;
+
 %imtoThresh = imtoThresh .* 255;
 
 imGray = im2gray(imtoThresh);
@@ -177,11 +183,13 @@ imtoThresh = imGray;
 %    end
 % end
 
+bink = mean(mean(mean(imtoThresh)));
+
 lowpass = ones(5)/(5^2);
 
 bfilt = imfilter(imtoThresh,lowpass,"symmetric");
 
-threshhold = 120;
+threshhold = bink + 5;
 % The thresholded image
 newIm = bfilt < threshhold;
 
@@ -244,7 +252,6 @@ newIm = toGreyWorld(im);
 %newIm = toWhitePatch(im);
 
 
-bonk = newIm;
 bink = mean(mean(mean(newIm)));
 
 %Få ut YCbCr & HSV
@@ -252,6 +259,9 @@ imInYCbCr = rgb2ycbcr(newIm);
 imInHSV = rgb2hsv(newIm);
 
 newIm = imInYCbCr(:,:,1)./3 + imInYCbCr(:,:,2)./3 + imInYCbCr(:,:,3)./3;
+
+%newIM = imInHSV(:,:,1)./3 + imInHSV(:,:,2)./3 + imInHSV(:,:,3)./3;
+
 
 lpFilter= ones(5)/(5^2);
 
@@ -297,6 +307,8 @@ newIm = imfill(newIm,'holes');
 figure(1);
 imshowpair(originalIm,newIm,'montage');
 title('Originalbild & Skin Mask');
+
+
 
 
 
