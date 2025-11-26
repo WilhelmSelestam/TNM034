@@ -234,16 +234,41 @@ v = atand(a/b);
 rotatedim = imrotate(I, v);
 %roterad a
 
-figure(9)
-imshow(rotatedim);
+
+
+spots = [eyeLeft(1), eyeLeft(2); eyeRight(1), eyeRight(2)];
+imSize = size(I);
+cx =  imSize(1) / 2;
+cy = imSize(2) / 2;
+theta = deg2rad(-v);
+R = [cos(theta) sin(theta); -sin(theta) cos(theta)];
+centered_eyes = spots - [cx, cy];
+rotated_eyes_centered = centered_eyes * R;
+imSize = size(rotatedim);
+cx =  imSize(1) / 2;
+cy = imSize(2) / 2;
+final_eyes = rotated_eyes_centered + [cx, cy];
+eyeLeft = final_eyes(1,:)
+eyeRight = final_eyes(2,:)
 
 eyeLeft = floor(eyeLeft);
 eyeRight = floor(eyeRight);
 
-croppedim = rotatedim(eyeLeft(1) : eyeLeft(2)+170, eyeRight(1) -120 : eyeRight(2) + 150, :);
+eyeSpacing = eyeRight(1) - eyeLeft(1);
+sideSpacing = round(eyeSpacing * 0.35);
+topSpacing = -round(eyeSpacing*0.7);
+bottomSpacing = round(eyeSpacing*1.6);
+
+croppedim = rotatedim(eyeLeft(2) + topSpacing : eyeLeft(2) + bottomSpacing, eyeLeft(1) - sideSpacing : eyeRight(1) + sideSpacing, :);
+%croppedim = rotatedim(1:100, 1:10, :);
+%croppedim = rotatedim;
 
 figure(10)
 imshow(croppedim);
+
+% figure(9)
+% imshow(rotatedim);
+% line([eyeLeft(1), eyeRight(1)], [eyeLeft(2), eyeRight(2)], 'Color', 'yellow', 'LineWidth', 2);
 
 %%
 for i = 1:length(face_candidates_stats)
