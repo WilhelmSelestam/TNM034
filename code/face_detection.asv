@@ -1,6 +1,6 @@
 clc; clear; close all;
 
-I_orig = imread('DB1\db1_01.jpg');
+I_orig = imread('DB1\db1_04.jpg');
 %I_orig = imrotate(I_orig, 10);
 %imwrite(I_orig, 'rot.jpg')
 I = im2double(I_orig);
@@ -217,17 +217,8 @@ for i = 1:size(detected_faces, 1)
     line([eye1(1), eye2(1)], [eye1(2), eye2(2)], 'Color', 'yellow', 'LineWidth', 2);
 end
 
-eyeLeft = e1;
-eyeRight = e2;
-
-if e1(1) > e2(1)
-    eyeLeft = e2;
-    eyeRight = e1;
-end
-
-
-a = eyeLeft(2) - eyeRight(2);
-b = eyeLeft(1) - eyeRight(1);
+a = e1(2) - e2(2);
+b = e1(1) - e2(1);
 v = atand(a/b);
 
 
@@ -237,10 +228,10 @@ rotatedim = imrotate(I, v);
 figure(9)
 imshow(rotatedim);
 
-eyeLeft = floor(eyeLeft);
-eyeRight = floor(eyeRight);
+e1 = floor(e1);
+e2 = floor(e2);
 
-croppedim = rotatedim(eyeLeft(1) : eyeLeft(2)+170, eyeRight(1) -120 : eyeRight(2) + 150, :);
+croppedim = rotatedim(e1(1)-10 : e1(2)+200, e2(1) -30 : e2(2) + 40, :);
 
 figure(10)
 imshow(croppedim);
