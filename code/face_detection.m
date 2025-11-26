@@ -1,6 +1,6 @@
 clc; clear; close all;
 
-I_orig = imread('DB1\db1_08.jpg');
+I_orig = imread('DB1\db1_10.jpg');
 %I_orig = imrotate(I_orig, 10);
 %imwrite(I_orig, 'rot.jpg')
 I = im2double(I_orig);
@@ -63,80 +63,81 @@ I_comp = im2uint8(I_comp);
 I_comp_ycbcr = rgb2ycbcr(I_comp);
 
 
-% skin_mask_raw = detectSkin(I_comp_ycbcr);
-% 
-% %imshow(skin_mask_raw);
-% 
-% 
-% se_open = strel('disk', 3);
-% skin_mask = imopen(skin_mask_raw, se_open);
-% 
-% se_close = strel('disk', 15);
-% skin_mask = imclose(skin_mask, se_close);
-% 
-% skin_mask = imfill(skin_mask, 'holes');
+skin_mask_raw = detectSkin(I_comp_ycbcr);
 
-%skin_mask_full = bwconvhull(skin_mask);
-
-%imshow(skin_mask);
+%imshow(skin_mask_raw);
 
 
-newIm = I_comp;
+se_open = strel('disk', 3);
+skin_mask = imopen(skin_mask_raw, se_open);
 
+se_close = strel('disk', 15);
+skin_mask = imclose(skin_mask, se_close);
 
-bink = mean(mean(mean(newIm)));
+skin_mask = imfill(skin_mask, 'holes');
 
-%Få ut YCbCr & HSV
-imInYCbCr = rgb2ycbcr(newIm);
-imInHSV = rgb2hsv(newIm);
+skin_mask_full = bwconvhull(skin_mask);
 
-newIm = imInYCbCr(:,:,1)./3 + imInYCbCr(:,:,2)./3 + imInYCbCr(:,:,3)./3;
-
-lpFilter= ones(5)/(5^2);
-
-newIm = imfilter(newIm,lpFilter,"symmetric");
-
-
-threshhold = bink + 5;
-% The thresholded image
-newIm = newIm < threshhold;
-
-
-%%%%%%%%%%%%%% Face Mask %%%%%%%%%%%%%%
-%Face Mask, Morphological operations
-
-innan = newIm;
-
-%imshow(innan);
-
-SE = strel('disk',10);
-newIm = imdilate(newIm,SE);
-
-
-% SE = strel('disk',3);
-% newIm = imdilate(newIm,SE);
-
-newIm = imfill(newIm,'holes');
-
-newIm =  newIm - innan;
-
-%imshow(newIm);
-
-SE = strel('disk',3);
-newIm = imclose(newIm,SE);
-
-SE = strel('disk',10);
-newIm = imopen(newIm,SE);
-
-newIm = imfill(newIm,'holes');
-
-skin_mask = newIm;
-
-
-
-imshow(skin_mask)
+imshow(skin_mask_raw);
 
 %%
+
+% 
+% newIm = I_comp;
+% 
+% 
+% bink = mean(mean(mean(newIm)));
+% 
+% %Få ut YCbCr & HSV
+% imInYCbCr = rgb2ycbcr(newIm);
+% imInHSV = rgb2hsv(newIm);
+% 
+% newIm = imInYCbCr(:,:,1)./3 + imInYCbCr(:,:,2)./3 + imInYCbCr(:,:,3)./3;
+% 
+% lpFilter= ones(5)/(5^2);
+% 
+% newIm = imfilter(newIm,lpFilter,"symmetric");
+% 
+% 
+% threshhold = bink + 5;
+% % The thresholded image
+% newIm = newIm < threshhold;
+% 
+% 
+% %%%%%%%%%%%%%% Face Mask %%%%%%%%%%%%%%
+% %Face Mask, Morphological operations
+% 
+% innan = newIm;
+% 
+% %imshow(innan);
+% 
+% SE = strel('disk',10);
+% newIm = imdilate(newIm,SE);
+% 
+% 
+% % SE = strel('disk',3); newIm = imdilate(newIm,SE);
+% 
+% newIm = imfill(newIm,'holes');
+% 
+% newIm =  newIm - innan;
+% 
+% %imshow(newIm);
+% 
+% SE = strel('disk',3);
+% newIm = imclose(newIm,SE);
+% 
+% SE = strel('disk',10);
+% newIm = imopen(newIm,SE);
+% 
+% newIm = imfill(newIm,'holes');
+% 
+% skin_mask = newIm;
+
+
+
+%imshow(skin_mask)
+
+
 
 % figure;
 % subplot(2, 1, 1);
@@ -177,14 +178,15 @@ for i = 1:length(face_candidates_stats)
 
     current_face_mask = bwconvhull(current_face_mask);
 
-    figure(i)
-    imshow(current_face_mask)
+    %figure(i)
+    %imshow(current_face_mask)
     
-    eyeMap = EyeMap(im2double(I_comp_ycbcr));
+    eyeMap = createEyeMap(I_comp_ycbcr, current_face_mask);
+    %eyeMap = EyeMap(im2double(I_comp_ycbcr));
    
     mouthMap = createMouthMap(I_comp_ycbcr, current_face_mask);
 
-     imshow(mouthMap)
+    %imshow(mouthMap)
     
     [score, ellipse, e1, e2] = verifyFaceCandidate(eyeMap, mouthMap, Y, current_face_mask);
     
