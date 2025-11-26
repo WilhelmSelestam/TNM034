@@ -1,6 +1,6 @@
-clc; clear; close all;
 
-I_orig = imread('DB1\db1_01.jpg');
+function croppedim = face_detection(I_orig)
+%I_orig = imread('DB1\db1_01.jpg');
 %I_orig = imrotate(I_orig, 10);
 %imwrite(I_orig, 'rot.jpg')
 I = im2double(I_orig);
@@ -198,31 +198,31 @@ for i = 1:length(face_candidates_stats)
     end
 end
 
-figure;
-imshow(I);
-title(['Final Detections: ' num2str(size(detected_faces, 1)) ' face(s)']);
+% figure;
+% imshow(I);
+% title(['Final Detections: ' num2str(size(detected_faces, 1)) ' face(s)']);
 
-e1
-e2
-score
-ellipse
+e1;
+e2;
+score;
+ellipse;
 
-detected_faces
+detected_faces;
 
 
 
-for i = 1:size(detected_faces, 1)
-    %drawEllipse(detected_faces(i));
-    drawEllipse(detected_faces(i, :));
-    line([eye1(1), eye2(1)], [eye1(2), eye2(2)], 'Color', 'yellow', 'LineWidth', 2);
-end
+% for i = 1:size(detected_faces, 1)
+%     %drawEllipse(detected_faces(i));
+%     drawEllipse(detected_faces(i, :));
+%     line([eye1(1), eye2(1)], [eye1(2), eye2(2)], 'Color', 'yellow', 'LineWidth', 2);
+% end
 
-eyeLeft = e1;
-eyeRight = e2;
+eyeLeft = eye1;
+eyeRight = eye2;
 
-if e1(1) > e2(1)
-    eyeLeft = e2;
-    eyeRight = e1;
+if (eye1(1) > eye2(1))
+    eyeLeft = eye2;
+    eyeRight = eye1;
 end
 
 
@@ -248,8 +248,8 @@ imSize = size(rotatedim);
 cx =  imSize(1) / 2;
 cy = imSize(2) / 2;
 final_eyes = rotated_eyes_centered + [cx, cy];
-eyeLeft = final_eyes(1,:)
-eyeRight = final_eyes(2,:)
+eyeLeft = final_eyes(1,:);
+eyeRight = final_eyes(2,:);
 
 eyeLeft = floor(eyeLeft);
 eyeRight = floor(eyeRight);
@@ -263,72 +263,17 @@ croppedim = rotatedim(eyeLeft(2) + topSpacing : eyeLeft(2) + bottomSpacing, eyeL
 %croppedim = rotatedim(1:100, 1:10, :);
 %croppedim = rotatedim;
 
-figure(10)
-imshow(croppedim);
+croppedim = imresize(croppedim, [260 190]);
+
+% figure(10)
+% imshow(croppedim);
 
 % figure(9)
 % imshow(rotatedim);
 % line([eyeLeft(1), eyeRight(1)], [eyeLeft(2), eyeRight(2)], 'Color', 'yellow', 'LineWidth', 2);
 
-%%
-for i = 1:length(face_candidates_stats)
-    
-    current_face_mask = false(size(skin_mask));
-    current_face_mask(valid_pixel_lists{i}) = true;
-    
-    eyeMap = EyeMap(im2double(I_comp_ycbcr));
-    imshow(eyeMap)
-    mouthMap = createMouthMap(I_comp_ycbcr, current_face_mask);
-    
-    bbox = face_candidates_stats(i).BoundingBox;
-    
-    figure;
-    subplot(2, 2, 1);
-    imshow(imcrop(I, bbox));
-    title(['Candidate ' num2str(i)]);
-    
-    subplot(2, 2, 2);
-    imshow(imcrop(eyeMap, bbox));
-    title('Eye Map');
-    
-    subplot(2, 2, 3);
-    imshow(imcrop(mouthMap, bbox));
-    title('Mouth Map');
 
-    subplot(2, 2, 4);
-    imshow(imcrop(current_face_mask, bbox));
-    title('Face Mask');
 end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-%%
-
-figure;
-imshow(I_comp);
-title('Face Candidates from Skin Grouping');
-hold on;
-
-for k = 1:size(face_candidate_boxes, 1)
-    bbox = face_candidate_boxes(k, :);
-    rectangle('Position', bbox, 'EdgeColor', 'r', 'LineWidth', 2);
-end
-    
-
-%%
-
 
 
 
