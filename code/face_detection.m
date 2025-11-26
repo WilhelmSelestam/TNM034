@@ -1,6 +1,6 @@
 clc; clear; close all;
 
-I_orig = imread('DB1\db1_11.jpg');
+I_orig = imread('DB1\db1_08.jpg');
 %I_orig = imrotate(I_orig, 10);
 %imwrite(I_orig, 'rot.jpg')
 I = im2double(I_orig);
@@ -180,8 +180,7 @@ for i = 1:length(face_candidates_stats)
     figure(i)
     imshow(current_face_mask)
     
-    eyeMap = createEyeMap(I_comp_ycbcr, current_face_mask);
-   
+    eyeMap = EyeMap(im2double(I_comp_ycbcr));
     mouthMap = createMouthMap(I_comp_ycbcr, current_face_mask);
 
      imshow(mouthMap)
@@ -225,8 +224,8 @@ for i = 1:length(face_candidates_stats)
     current_face_mask = false(size(skin_mask));
     current_face_mask(valid_pixel_lists{i}) = true;
     
-    eyeMap = createEyeMap(I_comp_ycbcr, current_face_mask);
-    %imshow(eyeMap)
+    eyeMap = EyeMap(im2double(I_comp_ycbcr));
+    imshow(eyeMap)
     mouthMap = createMouthMap(I_comp_ycbcr, current_face_mask);
     
     bbox = face_candidates_stats(i).BoundingBox;
