@@ -309,14 +309,97 @@ imshowpair(originalIm,newIm,'montage');
 title('Originalbild & Skin Mask');
 
 
+%%
+clc; clear, close all;
+%
+
+
+files = [dir('*.jpg');dir('*.png');dir('*.bmp')] ;  % Get jpg, png and bmp files in the present folder 
+N = length(files) ;  % Total number of image files 
+
+
+for i = 1:N  % loop for each file 
+    I = imread(files(i).name) ;  % Read the file 
+    
+
+
+    %%%%%%%%%%%%%%% Bild läses in %%%%%%%%%%%%%%%
+im = I;
+originalIm = im;
+
+% figure('Name','Steg 0: Originalbild','NumberTitle','off');
+% subplot(1,3,1);
+% imshow(originalIm);
+% title('Originalbild');
+
+newIm = toGreyWorld(im);
+%newIm = toWhitePatch(im);
+
+
+bink = mean(mean(mean(newIm)));
+
+%Få ut YCbCr & HSV
+imInYCbCr = rgb2ycbcr(newIm);
+imInHSV = rgb2hsv(newIm);
+
+newIm = imInYCbCr(:,:,1)./3 + imInYCbCr(:,:,2)./3 + imInYCbCr(:,:,3)./3;
+
+%newIM = imInHSV(:,:,1)./3 + imInHSV(:,:,2)./3 + imInHSV(:,:,3)./3;
+
+
+lpFilter= ones(5)/(5^2);
+
+newIm = imfilter(newIm,lpFilter,"symmetric");
+
+
+threshhold = bink + 5;
+% The thresholded image
+newIm = newIm < threshhold;
+
+
+%%%%%%%%%%%%%% Face Mask %%%%%%%%%%%%%%
+%Face Mask, Morphological operations
+
+innan = newIm;
+
+SE = strel('disk',8);
+newIm = imdilate(newIm,SE);
+
+
+% SE = strel('disk',3);
+% newIm = imdilate(newIm,SE);
+
+newIm = imfill(newIm,'holes');
+
+newIm = newIm - innan;
+
+SE = strel('disk',3);
+newIm = imclose(newIm,SE);
+
+SE = strel('disk',10);
+newIm = imopen(newIm,SE);
+
+newIm = imfill(newIm,'holes');
+% 
+% SE = strel('sphere',15);
+% newIm = imopen(newIm,SE);
+
+
+
+%%%%%%%%%%% Display plots %%%%%%%%%%%%%%
+
+figure('Name','Test' + i,'off');
+imshowpair(originalIm,newIm,'montage');
+title('Originalbild & Skin Mask');
+
+end
 
 
 
 
 
 
-
-
+dir("DB1\)
 
 
 

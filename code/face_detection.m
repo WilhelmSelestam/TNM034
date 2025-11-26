@@ -184,7 +184,6 @@ for i = 1:length(face_candidates_stats)
     eyeMap = createEyeMap(I_comp_ycbcr, current_face_mask);
     %eyeMap = EyeMap(im2double(I_comp_ycbcr));
    
-    mouthMap = createMouthMap(I_comp_ycbcr, current_face_mask);
 
     %imshow(mouthMap)
     
