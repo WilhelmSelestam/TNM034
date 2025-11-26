@@ -1,8 +1,14 @@
 
 clc; clear; close all;
 
+Directory = 'DB1\'; 
+% Read images from Images folder
+Imgs = dir(fullfile(Directory,'*.jpg'));
+% for j=1:length(Imgs)
+%     Img = imread(fullfile(Directory,Imgs(j).name));
+% end
 
-img = imread('DB1\db1_01.jpg');
+%img = imread('db2\il_16.jpg');
 
 h = 260;
 w = 190;
@@ -14,10 +20,15 @@ for i = 1:16
         continue;
     end
 
-    filename = sprintf('DB1\\db1_%02d.jpg', i);
-    img = imread(filename);
+    filename = imread(fullfile(Directory,Imgs(i).name));
+    %filename = sprintf('DB1\\db1_%02d.jpg', i);
+    %img = imread(filename);
+    img = filename;
      % Resize till samma storlek
     img = rgb2gray(face_detection(img));
+
+    figure(i)
+    imshow(img);
 
     j = i;
     if i > 10
@@ -43,8 +54,17 @@ eigenfaces = eigenfaces(:, order);
 eigenfaces = eigenfaces(:,1:15);
 weights = eigenfaces' * A; % vikter hittade
 
+%allDists = zeros(15, 15);
+%images(:,1) = img(:);
+
+% for i = 1:16
+%     if (i == 10)
+%         continue;
+%     end
+
 %testade en bild för att se om den kan hitta närmaste bilden 
-comparingface = 'DB1\db1_10.jpg';
+%comparingface = fullfile(Directory,Imgs(i).name);
+comparingface = 'Images\rot.jpg';
 comparingface = im2double(imread(comparingface));
 comparingface = rgb2gray(face_detection(comparingface));
 comparingfacezero = zeros(h*w, 1);
@@ -52,7 +72,14 @@ comparingfacezero(:,1) = comparingface(:);
 comparingface = comparingfacezero - mean_face;
 new_weights = eigenfaces' * comparingface;
 distances = vecnorm(weights - new_weights, 2, 1);
-[~,matchadbild] = min(distances);
+%allDists(:,i) = distances;
+if min(distances) < 5
+    [~,matchadbild] = min(distances);
+else
+    matchadbild = 0;
+end
+    
+% end
 
 svar = matchadbild;
 if svar >= 10
@@ -60,8 +87,6 @@ if svar >= 10
 end
 
 svar
-
-
 
 
 

@@ -168,7 +168,7 @@ face_scores = [];
 eye1 = [];
 eye2 = [];
 
-MIN_FACE_SCORE_THRESHOLD = 0.2; % ????????
+MIN_FACE_SCORE_THRESHOLD = 0.1; % ????????
 
 for i = 1:length(face_candidates_stats)
     

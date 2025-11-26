@@ -1,3 +1,279 @@
+
+I_orig = imread('DB1\db1_14.jpg');
+%I_orig = imrotate(I_orig, 10);
+%imwrite(I_orig, 'rot.jpg')
+I = im2double(I_orig);
+
+I_ycbcr = rgb2ycbcr(I);
+Y = I_ycbcr(:,:,1);
+
+thresh = quantile(Y(:), 0.95); 
+ref_mask = Y > thresh;
+
+%Välj "White Patch" (1) eller "Grey World" (0)
+normalisera = 0;
+
+%Check för att se om bilden behöver vitbalanceras
+if nnz(ref_mask) > 100 
+        R = I(:,:,1);
+        G = I(:,:,2);
+        B = I(:,:,3);
+        
+        avg_R = mean(R(ref_mask));
+        avg_G = mean(G(ref_mask));
+        avg_B = mean(B(ref_mask));
+
+    if normalisera == 1
+        scale_R = 1.0 / avg_R;
+        scale_G = 1.0 / avg_G;
+        scale_B = 1.0 / avg_B;
+    
+        I_comp = zeros(size(I));
+        I_comp(:,:,1) = I(:,:,1) * scale_R;
+        I_comp(:,:,2) = I(:,:,2) * scale_G;
+        I_comp(:,:,3) = I(:,:,3) * scale_B;
+        
+        I_comp(I_comp > 1) = 1;
+    else
+        gainForR = avg_G/avg_R;
+        gainForG = avg_G/avg_B;
+            
+        %Räkna ut nya RChannel & GChannel med gainForR & gainForG
+        R = gainForR .* R;
+        G = gainForG .* G;
+        
+        I_comp = cat(3,R, G, B);
+    end
+else
+    I_comp = I;
+end
+
+
+I_comp = im2uint8(I_comp);
+
+
+%figure;
+%subplot(1, 3, 1);
+%imshow(I_orig);
+
+%subplot(1, 3, 2);
+%imshow(I_comp);
+
+I_comp_ycbcr = rgb2ycbcr(I_comp);
+
+
+skin_mask_raw = detectSkin(I_comp_ycbcr);
+
+%imshow(skin_mask_raw);
+
+
+se_open = strel('disk', 3);
+skin_mask = imopen(skin_mask_raw, se_open);
+
+se_close = strel('disk', 15);
+skin_mask = imclose(skin_mask, se_close);
+
+skin_mask = imfill(skin_mask, 'holes');
+
+skin_mask_full = bwconvhull(skin_mask);
+
+imshow(skin_mask);
+%%
+
+% 
+% newIm = I_comp;
+% 
+% 
+% bink = mean(mean(mean(newIm)));
+% 
+% %Få ut YCbCr & HSV
+% imInYCbCr = rgb2ycbcr(newIm);
+% imInHSV = rgb2hsv(newIm);
+% 
+% newIm = imInYCbCr(:,:,1)./3 + imInYCbCr(:,:,2)./3 + imInYCbCr(:,:,3)./3;
+% 
+% lpFilter= ones(5)/(5^2);
+% 
+% newIm = imfilter(newIm,lpFilter,"symmetric");
+% 
+% 
+% threshhold = bink + 5;
+% % The thresholded image
+% newIm = newIm < threshhold;
+% 
+% 
+% %%%%%%%%%%%%%% Face Mask %%%%%%%%%%%%%%
+% %Face Mask, Morphological operations
+% 
+% innan = newIm;
+% 
+% %imshow(innan);
+% 
+% SE = strel('disk',10);
+% newIm = imdilate(newIm,SE);
+% 
+% 
+% % SE = strel('disk',3); newIm = imdilate(newIm,SE);
+% 
+% newIm = imfill(newIm,'holes');
+% 
+% newIm =  newIm - innan;
+% 
+% %imshow(newIm);
+% 
+% SE = strel('disk',3);
+% newIm = imclose(newIm,SE);
+% 
+% SE = strel('disk',10);
+% newIm = imopen(newIm,SE);
+% 
+% newIm = imfill(newIm,'holes');
+% 
+% skin_mask = newIm;
+
+
+
+%imshow(skin_mask)
+
+
+
+% figure;
+% subplot(2, 1, 1);
+% imshow(skin_mask_raw);
+% title('skin mask raw');
+% 
+% subplot(2, 1, 2);
+% imshow(skin_mask);
+% title('skin mask');
+
+
+cc = bwconncomp(skin_mask);
+%cc = [cc cc2];
+stats = regionprops(cc, 'BoundingBox', 'Area');
+
+min_face_area = 500;
+max_face_area = size(skin_mask, 1) * size(skin_mask, 2) * 1.75; % 0.75
+
+valid_indices = [stats.Area] > min_face_area & [stats.Area] < max_face_area;
+face_candidates_stats = stats(valid_indices);
+
+
+face_candidate_boxes = cat(1, face_candidates_stats.BoundingBox);
+
+valid_pixel_lists = cc.PixelIdxList(valid_indices);
+
+detected_faces = [];
+face_scores = [];
+eye1 = [];
+eye2 = [];
+
+MIN_FACE_SCORE_THRESHOLD = 0.1; % ????????
+
+for i = 1:length(face_candidates_stats)
+    
+    current_face_mask = false(size(skin_mask));
+    current_face_mask(valid_pixel_lists{i}) = true;
+
+    current_face_mask = bwconvhull(current_face_mask);
+
+    %figure(i)
+    %imshow(current_face_mask)
+    
+    eyeMap = createEyeMap(I_comp_ycbcr, current_face_mask);
+    %eyeMap = EyeMap(im2double(I_comp_ycbcr));
+
+    mouthMap = createMouthMap(I_comp_ycbcr, current_face_mask);
+   
+
+    %imshow(mouthMap)
+    
+    [score, ellipse, e1, e2] = verifyFaceCandidate(eyeMap, mouthMap, Y, current_face_mask);
+    
+    if score > MIN_FACE_SCORE_THRESHOLD
+        detected_faces = [detected_faces; ellipse];
+        face_scores = [face_scores; score];
+        eye1 = [eye1; e1];
+        eye2 = [eye2; e2];
+    end
+end
+
+% figure;
+% imshow(I);
+% title(['Final Detections: ' num2str(size(detected_faces, 1)) ' face(s)']);
+
+e1;
+e2;
+score;
+ellipse;
+
+detected_faces;
+
+
+
+% for i = 1:size(detected_faces, 1)
+%     %drawEllipse(detected_faces(i));
+%     drawEllipse(detected_faces(i, :));
+%     line([eye1(1), eye2(1)], [eye1(2), eye2(2)], 'Color', 'yellow', 'LineWidth', 2);
+% end
+
+eyeLeft = eye1;
+eyeRight = eye2;
+
+if (eye1(1) > eye2(1))
+    eyeLeft = eye2;
+    eyeRight = eye1;
+end
+
+
+a = eyeLeft(2) - eyeRight(2);
+b = eyeLeft(1) - eyeRight(1);
+v = atand(a/b);
+
+
+rotatedim = imrotate(I, v);
+%roterad a
+
+
+
+spots = [eyeLeft(1), eyeLeft(2); eyeRight(1), eyeRight(2)];
+imSize = size(I);
+cx =  imSize(1) / 2;
+cy = imSize(2) / 2;
+theta = deg2rad(-v);
+R = [cos(theta) sin(theta); -sin(theta) cos(theta)];
+centered_eyes = spots - [cx, cy];
+rotated_eyes_centered = centered_eyes * R;
+imSize = size(rotatedim);
+cx =  imSize(1) / 2;
+cy = imSize(2) / 2;
+final_eyes = rotated_eyes_centered + [cx, cy];
+eyeLeft = final_eyes(1,:);
+eyeRight = final_eyes(2,:);
+
+eyeLeft = floor(eyeLeft);
+eyeRight = floor(eyeRight);
+
+eyeSpacing = eyeRight(1) - eyeLeft(1);
+sideSpacing = round(eyeSpacing * 0.35);
+topSpacing = -round(eyeSpacing*0.7);
+bottomSpacing = round(eyeSpacing*1.6);
+
+croppedim = rotatedim(eyeLeft(2) + topSpacing : eyeLeft(2) + bottomSpacing, eyeLeft(1) - sideSpacing : eyeRight(1) + sideSpacing, :);
+%croppedim = rotatedim(1:100, 1:10, :);
+%croppedim = rotatedim;
+
+croppedim = imresize(croppedim, [260 190]);
+
+figure(10)
+imshow(croppedim);
+
+% figure(9)
+% imshow(rotatedim);
+% line([eyeLeft(1), eyeRight(1)], [eyeLeft(2), eyeRight(2)], 'Color', 'yellow', 'LineWidth', 2);
+
+
+
+
 %%
 for i = 1:length(face_candidates_stats)
     
@@ -43,3 +319,25 @@ end
     
 
 %%
+
+
+function drawEllipse(ellipse_params)
+    
+    cx = ellipse_params(1);
+    cy = ellipse_params(2);
+    a = ellipse_params(3) / 2;
+    b = ellipse_params(4) / 2;
+    theta = ellipse_params(5);
+
+    t = linspace(0, 2*pi, 100);
+    
+    x = cx + a * cos(t) * cos(theta) - b * sin(t) * sin(theta);
+    y = cy + a * cos(t) * sin(theta) + b * sin(t) * cos(theta);
+    
+    hold on;
+    plot(x, y, 'g', 'LineWidth', 2);
+    hold off;
+end
+
+
+
