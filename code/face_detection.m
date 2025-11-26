@@ -78,9 +78,8 @@ skin_mask = imfill(skin_mask, 'holes');
 
 skin_mask_full = bwconvhull(skin_mask);
 
-imshow(skin_mask_raw);
+%imshow(skin_mask_raw);
 
-%%
 
 % 
 % newIm = I_comp;
@@ -183,6 +182,8 @@ for i = 1:length(face_candidates_stats)
     
     eyeMap = createEyeMap(I_comp_ycbcr, current_face_mask);
     %eyeMap = EyeMap(im2double(I_comp_ycbcr));
+
+    mouthMap = createMouthMap(I_comp_ycbcr, current_face_mask);
    
 
     %imshow(mouthMap)
