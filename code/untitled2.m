@@ -1,70 +1,115 @@
+clc; clear; close all;
 
-I_orig = imread('DB1\db1_14.jpg');
+
+I_orig = imread('DB1\db1_07.jpg');
 %I_orig = imrotate(I_orig, 10);
 %imwrite(I_orig, 'rot.jpg')
 I = im2double(I_orig);
+% 
+% % I = I .* 1.3;
+% 
+% I_ycbcr = rgb2ycbcr(I);
+% Y = I_ycbcr(:,:,1);
+% 
+% thresh = quantile(Y(:), 0.95); 
+% ref_mask = Y > thresh;
+% 
+% %Välj "White Patch" (1) eller "Grey World" (0)
+% normalisera = 0;
+% 
+% %Check för att se om bilden behöver vitbalanceras
+% if nnz(ref_mask) > 100 
+%         R = I(:,:,1);
+%         G = I(:,:,2);
+%         B = I(:,:,3);
+%         
+%         avg_R = mean(R(ref_mask));
+%         avg_G = mean(G(ref_mask));
+%         avg_B = mean(B(ref_mask));
+% 
+%     if normalisera == 1
+%         scale_R = 1.0 / avg_R;
+%         scale_G = 1.0 / avg_G;
+%         scale_B = 1.0 / avg_B;
+%     
+%         I_comp = zeros(size(I));
+%         I_comp(:,:,1) = I(:,:,1) * scale_R;
+%         I_comp(:,:,2) = I(:,:,2) * scale_G;
+%         I_comp(:,:,3) = I(:,:,3) * scale_B;
+%         
+%         I_comp(I_comp > 1) = 1;
+%     else
+%         gainForR = avg_G/avg_R;
+%         gainForB = avg_G/avg_B;
+%             
+%         %Räkna ut nya RChannel & GChannel med gainForR & gainForG
+%         R = gainForR .* R;
+%         B = gainForB .* B;
+%         
+%         I_comp = cat(3,R, G, B);
+%     end
+% else
+%     I_comp = I;
+% end
 
-I_ycbcr = rgb2ycbcr(I);
+%I_orig_sus = I_orig .* 0.7;
+
+I_comp = applyLightCompensation(I_orig);
+
+I10 = im2double(I_comp);
+
+I_ycbcr = rgb2ycbcr(I10);
 Y = I_ycbcr(:,:,1);
 
-thresh = quantile(Y(:), 0.95); 
-ref_mask = Y > thresh;
-
-%Välj "White Patch" (1) eller "Grey World" (0)
-normalisera = 0;
-
-%Check för att se om bilden behöver vitbalanceras
-if nnz(ref_mask) > 100 
-        R = I(:,:,1);
-        G = I(:,:,2);
-        B = I(:,:,3);
-        
-        avg_R = mean(R(ref_mask));
-        avg_G = mean(G(ref_mask));
-        avg_B = mean(B(ref_mask));
-
-    if normalisera == 1
-        scale_R = 1.0 / avg_R;
-        scale_G = 1.0 / avg_G;
-        scale_B = 1.0 / avg_B;
-    
-        I_comp = zeros(size(I));
-        I_comp(:,:,1) = I(:,:,1) * scale_R;
-        I_comp(:,:,2) = I(:,:,2) * scale_G;
-        I_comp(:,:,3) = I(:,:,3) * scale_B;
-        
-        I_comp(I_comp > 1) = 1;
-    else
-        gainForR = avg_G/avg_R;
-        gainForG = avg_G/avg_B;
-            
-        %Räkna ut nya RChannel & GChannel med gainForR & gainForG
-        R = gainForR .* R;
-        G = gainForG .* G;
-        
-        I_comp = cat(3,R, G, B);
-    end
-else
-    I_comp = I;
-end
+%     %img = double(I_orig);
+%     img = I_orig;
+%     
+%     % Calculate averages [cite: 66]
+%     avgR = mean(mean(img(:,:,1)));
+%     avgG = mean(mean(img(:,:,2)));
+%     avgB = mean(mean(img(:,:,3)));
+%     avgGray = (avgR + avgG + avgB) / 3;
+%     
+%     % Calculate adjustment factors [cite: 68]
+%     aR = avgGray / avgR;
+%     aG = avgGray / avgG;
+%     aB = avgGray / avgB;
+%     
+%     % Apply adjustments [cite: 69-70]
+%     img_corrected = img;
+%     img_corrected(:,:,1) = img(:,:,1) * aR;
+%     img_corrected(:,:,2) = img(:,:,2) * aG;
+%     img_corrected(:,:,3) = img(:,:,3) * aB;
+%     
+%     % Clip values to 255 [cite: 71]W
+%     img_corrected(img_corrected > 255) = 255;
+% 
+% 
+% I_comp = im2double(img_corrected);
+%imshow(I_comp)
 
 
 I_comp = im2uint8(I_comp);
 
 
-%figure;
-%subplot(1, 3, 1);
-%imshow(I_orig);
+% figure;
+% subplot(1, 3, 1);
+% imshow(I_orig);
+% 
+% subplot(1, 3, 2);
+% imshow(I_orig_sus);
+% 
+% subplot(1, 3, 3);
+% imshow(I_comp);
 
-%subplot(1, 3, 2);
-%imshow(I_comp);
 
 I_comp_ycbcr = rgb2ycbcr(I_comp);
 
 
 skin_mask_raw = detectSkin(I_comp_ycbcr);
+% skin_mask_raw = detect_skin_face(I_comp);
 
-%imshow(skin_mask_raw);
+% imshow(skin_mask_raw);
 
 
 se_open = strel('disk', 3);
@@ -77,8 +122,8 @@ skin_mask = imfill(skin_mask, 'holes');
 
 skin_mask_full = bwconvhull(skin_mask);
 
-imshow(skin_mask);
-%%
+% imshow(skin_mask_raw);
+
 
 % 
 % newIm = I_comp;
@@ -152,7 +197,7 @@ cc = bwconncomp(skin_mask);
 stats = regionprops(cc, 'BoundingBox', 'Area');
 
 min_face_area = 500;
-max_face_area = size(skin_mask, 1) * size(skin_mask, 2) * 1.75; % 0.75
+max_face_area = size(skin_mask, 1) * size(skin_mask, 2) * 0.75; % 1.75
 
 valid_indices = [stats.Area] > min_face_area & [stats.Area] < max_face_area;
 face_candidates_stats = stats(valid_indices);
@@ -197,12 +242,12 @@ for i = 1:length(face_candidates_stats)
     end
 end
 
-% figure;
-% imshow(I);
-% title(['Final Detections: ' num2str(size(detected_faces, 1)) ' face(s)']);
+figure;
+imshow(I);
+title(['Final Detections: ' num2str(size(detected_faces, 1)) ' face(s)']);
 
-e1;
-e2;
+e1
+e2
 score;
 ellipse;
 
@@ -210,14 +255,21 @@ detected_faces;
 
 
 
-% for i = 1:size(detected_faces, 1)
-%     %drawEllipse(detected_faces(i));
-%     drawEllipse(detected_faces(i, :));
-%     line([eye1(1), eye2(1)], [eye1(2), eye2(2)], 'Color', 'yellow', 'LineWidth', 2);
-% end
+for i = 1:size(detected_faces, 1)
+    %drawEllipse(detected_faces(i));
+    drawEllipse(detected_faces(i, :));
+    line([eye1(1), eye2(1)], [eye1(2), eye2(2)], 'Color', 'yellow', 'LineWidth', 2);
+end
+
+%%
 
 eyeLeft = eye1;
 eyeRight = eye2;
+
+if length(eye1) < 1 || length(eye2) < 1
+    error = "No eyes found"
+    return;
+end
 
 if (eye1(1) > eye2(1))
     eyeLeft = eye2;
@@ -267,9 +319,9 @@ croppedim = imresize(croppedim, [260 190]);
 figure(10)
 imshow(croppedim);
 
-% figure(9)
-% imshow(rotatedim);
-% line([eyeLeft(1), eyeRight(1)], [eyeLeft(2), eyeRight(2)], 'Color', 'yellow', 'LineWidth', 2);
+figure(9)
+imshow(rotatedim);
+line([eyeLeft(1), eyeRight(1)], [eyeLeft(2), eyeRight(2)], 'Color', 'yellow', 'LineWidth', 2);
 
 
 
@@ -280,13 +332,13 @@ for i = 1:length(face_candidates_stats)
     current_face_mask = false(size(skin_mask));
     current_face_mask(valid_pixel_lists{i}) = true;
     
-    eyeMap = EyeMap(im2double(I_comp_ycbcr));
-    imshow(eyeMap)
+    eyeMap = createEyeMap(I_comp_ycbcr, current_face_mask);
+    %imshow(eyeMap)
     mouthMap = createMouthMap(I_comp_ycbcr, current_face_mask);
     
     bbox = face_candidates_stats(i).BoundingBox;
     
-    figure;
+    figure(38);
     subplot(2, 2, 1);
     imshow(imcrop(I, bbox));
     title(['Candidate ' num2str(i)]);

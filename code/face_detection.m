@@ -3,55 +3,60 @@ function croppedim = face_detection(I_orig)
 %I_orig = imread('DB1\db1_01.jpg');
 %I_orig = imrotate(I_orig, 10);
 %imwrite(I_orig, 'rot.jpg')
+
 I = im2double(I_orig);
 
-I_ycbcr = rgb2ycbcr(I);
-Y = I_ycbcr(:,:,1);
 
-thresh = quantile(Y(:), 0.95); 
-ref_mask = Y > thresh;
+% 
+% thresh = quantile(Y(:), 0.95); 
+% ref_mask = Y > thresh;
+% 
+% %Välj "White Patch" (1) eller "Grey World" (0)
+% normalisera = 0;
+% 
+% %Check för att se om bilden behöver vitbalanceras
+% if nnz(ref_mask) > 100 
+%         R = I(:,:,1);
+%         G = I(:,:,2);
+%         B = I(:,:,3);
+%         
+%         avg_R = mean(R(ref_mask));
+%         avg_G = mean(G(ref_mask));
+%         avg_B = mean(B(ref_mask));
+% 
+%     if normalisera == 1
+%         scale_R = 1.0 / avg_R;
+%         scale_G = 1.0 / avg_G;
+%         scale_B = 1.0 / avg_B;
+%     
+%         I_comp = zeros(size(I));
+%         I_comp(:,:,1) = I(:,:,1) * scale_R;
+%         I_comp(:,:,2) = I(:,:,2) * scale_G;
+%         I_comp(:,:,3) = I(:,:,3) * scale_B;
+%         
+%         I_comp(I_comp > 1) = 1;
+%     else
+%         gainForR = avg_G/avg_R;
+%         gainForB = avg_G/avg_B;
+%             
+%         %Räkna ut nya RChannel & GChannel med gainForR & gainForG
+%         R = gainForR .* R;
+%         B = gainForB .* B;
+%         
+%         I_comp = cat(3,R, G, B);
+%     end
+% else
+%     I_comp = I;
+% end
 
-%Välj "White Patch" (1) eller "Grey World" (0)
-normalisera = 0;
-
-%Check för att se om bilden behöver vitbalanceras
-if nnz(ref_mask) > 100 
-        R = I(:,:,1);
-        G = I(:,:,2);
-        B = I(:,:,3);
-        
-        avg_R = mean(R(ref_mask));
-        avg_G = mean(G(ref_mask));
-        avg_B = mean(B(ref_mask));
-
-    if normalisera == 1
-        scale_R = 1.0 / avg_R;
-        scale_G = 1.0 / avg_G;
-        scale_B = 1.0 / avg_B;
-    
-        I_comp = zeros(size(I));
-        I_comp(:,:,1) = I(:,:,1) * scale_R;
-        I_comp(:,:,2) = I(:,:,2) * scale_G;
-        I_comp(:,:,3) = I(:,:,3) * scale_B;
-        
-        I_comp(I_comp > 1) = 1;
-    else
-        gainForR = avg_G/avg_R;
-        gainForG = avg_G/avg_B;
-            
-        %Räkna ut nya RChannel & GChannel med gainForR & gainForG
-        R = gainForR .* R;
-        G = gainForG .* G;
-        
-        I_comp = cat(3,R, G, B);
-    end
-else
-    I_comp = I;
-end
-
+I_comp = applyLightCompensation(I_orig);
 
 I_comp = im2uint8(I_comp);
 
+I10 = im2double(I_comp);
+
+I_ycbcr = rgb2ycbcr(I10);
+Y = I_ycbcr(:,:,1);
 
 %figure;
 %subplot(1, 3, 1);

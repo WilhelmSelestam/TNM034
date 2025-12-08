@@ -26,6 +26,13 @@ function mouthMap = createMouthMap(I_ycbcr, face_mask)
     
     mouthMap_dilated = imdilate(mouthMap, strel('disk', 5));
     mouthMap_final = mouthMap_dilated .* face_mask;
-    
+
+    %figure(65);
+    %subplot(1,2,1)
+    %imshow(mouthMap_final)
+    %mouthMap_final = mouthMap_final > 150;
     mouthMap = mat2gray(mouthMap_final);
+    mouthMap = mouthMap > 0.4;
+    %subplot(1,2,2)
+    %imshow(mouthMap)
 end

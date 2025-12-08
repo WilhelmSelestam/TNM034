@@ -15,9 +15,11 @@ function [best_score, best_ellipse, best_e1, best_e2] = verifyFaceCandidate(eyeM
     mouth_thresh = quantile(mouthMap(face_mask), 0.90);
     
     eye_blobs_mask = (eyeMap > eye_thresh) & face_mask;
+    %figure(25)
     %imshow(eye_blobs_mask)
     mouth_blobs_mask = (mouthMap > mouth_thresh) & face_mask;
-
+    %imshow(mouth_blobs_mask)
+        
     eye_stats = regionprops(bwconncomp(eye_blobs_mask), eyeMap, 'Centroid', 'MeanIntensity');
     mouth_stats = regionprops(bwconncomp(mouth_blobs_mask), mouthMap, 'Centroid', 'MeanIntensity');
 
@@ -98,6 +100,8 @@ function [best_score, best_ellipse, best_e1, best_e2] = verifyFaceCandidate(eyeM
         end
     end
 end
+
+
 
 %% --- HELPER FUNCTION 1: Get Ellipse Pixels ---
 function [X_coords, Y_coords] = getEllipsePixels(ellipse_params, imgSize)

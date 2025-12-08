@@ -27,10 +27,12 @@ function eyeMap = createEyeMap(I_ycbcr, face_mask)
 
     eyeMap = EyeMapL .* EyeMapC;
     
-    eyeMap_dilated = imdilate(eyeMap, strel('disk', 5));
+    eyeMap_dilated = imdilate(eyeMap, strel('disk', 7));
     eyeMap_final = eyeMap_dilated .* face_mask;
     
+    %eyeMap = eyeMap_final;
     eyeMap = mat2gray(eyeMap_final);
+    %eyeMap = eyeMap > 0.4;
 end
 
 

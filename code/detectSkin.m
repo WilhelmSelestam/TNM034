@@ -4,18 +4,44 @@ function skin_mask = detectSkin(I_ycbcr)
 
     Cb = double(I_ycbcr(:,:,2));
     Cr = double(I_ycbcr(:,:,3));
+    Y = double(I_ycbcr(:,:,1));
 
-    mask_Cb = (Cb >= 77) & (Cb <= 127);
-    mask_Cr = (Cr >= 133) & (Cr <= 173);
-    skin_mask = mask_Cb & mask_Cr;
+    mask_Cb = (Cb >= 60) & (Cb <= 135);
+    mask_Cr = (Cr >= 125) & (Cr <= 175);
+    %skin_mask = mask_Cb & mask_Cr;
 
     imgHSV = rgb2hsv(ycbcr2rgb(I_ycbcr));
     H = imgHSV(:,:,1);
     S = imgHSV(:,:,2);
 
-    maskHSV = (H <= 0.15 | H >= 0.95) & (S >= 0.2 & S <= 0.8);
+    %maskHSV = (H <= 0.15 | H >= 0.8) & (S >= 0.05 & S <= 0.95);
+    %skin_mask = skin_mask & maskHSV;
+
+    base_skin = (H <= 0.15 | H >= 0.8) & (S >= 0.05 & S <= 0.95);
     
-    skin_mask = skin_mask & maskHSV;
+    is_bright = Y > 0.8;
+    pale_skin = is_bright & (H <= 0.15 | H >= 0.8) & (S >= 0.0);
+    
+    maskHSV_combined = base_skin | pale_skin;
+    
+    % Final Mask
+    skin_mask = mask_Cb & mask_Cr & maskHSV_combined;
+
+%     Cb = double(I_ycbcr(:,:,2));
+%     Cr = double(I_ycbcr(:,:,3));
+% 
+%     mask_Cb = (Cb >= 77) & (Cb <= 127);
+%     mask_Cr = (Cr >= 133) & (Cr <= 173);
+%     skin_mask = mask_Cb & mask_Cr;
+% 
+%     imgHSV = rgb2hsv(ycbcr2rgb(I_ycbcr));
+%     H = imgHSV(:,:,1);
+%     S = imgHSV(:,:,2);
+% 
+%     maskHSV = (H <= 0.15 | H >= 0.95) & (S >= 0.2 & S <= 0.8);
+%     
+%     skin_mask = skin_mask & maskHSV;
+    
 
     %{ 
     
